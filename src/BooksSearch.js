@@ -14,32 +14,31 @@ class BooksSearch extends Component{
     this.setState(() => ({
       query: query
     }), ()=> console.log("query: ", this.state.query))
-    this.search()
+    this.search(this.state.query)
   }
 
-  search = async() => {
-    if(this.state.query.length > 0){
-      BooksAPI.search(this.state.query)
+  search = (query) => {
+    if(query.length > 0){
+      BooksAPI.search(query)
       .then((books) => {
-        this.setState({
-          searchResult: books
-        },() => console.log(this.state.searchResult))
+        if(books.error){
+          this.setState({searchResult:[]})
+        } else {
+          this.setState({
+            searchResult: books
+          },() => console.log(this.state.searchResult))
+        }
+        
       })
-      .catch(async() => {
+      .catch(() => {
         console.log("Not found")
-        await this.setState({searchResult:this.props.books})
+        this.setState({searchResult:this.props.books})
       })
     } else {
       console.log("empty")
     }
   }
 
-  updateShelf = (book,event) =>{
-    console.log("book", book);
-    console.log("shelf", event.target.value)
-    BooksAPI.update(book,event.target.value)
-    
-  }
     render() {
       const {query, searchResult}= this.state 
 
@@ -64,32 +63,35 @@ class BooksSearch extends Component{
 
               </div>
             </div>
-            {searchResult &&
               <div className="search-books-results">
-                <ol className="books-grid">
-                  {searchResult && searchResult.map((book,key) => (
-                    <li key={key}>
-                      <div className="book">
-                          <div className="book-top">
-                              {book.imageLinks.smallThumbnail !=undefined && <div className="book-cover" style={{width: 128, height:193, backgroundImage: `url(${book.imageLinks && book.imageLinks.smallThumbnail})`}}></div>}
-                                  <div className="book-shelf-changer">
-                                    <select value={book.shelf} onChange={(event)=>this.updateShelf(book,event)}>
-                                        <option value="move" disabled>Move to...</option>
-                                        <option value="currentlyReading">Currently Reading</option>
-                                        <option value="wantToRead">Want to Read</option>
-                                        <option value="read">Read</option>
-                                        <option value="none">None</option>
-                                    </select>
+                {this.state.query === '' ? 
+                  <div>Enter some keyword</div>  
+                  :
+                  <ol className="books-grid">
+                    {searchResult.length !==0 && searchResult.map((book,key) => (
+                      <li key={key}>
+                        <div className="book">
+                            <div className="book-top">
+                                <div className="book-cover" style={{width: 128, height:193, backgroundImage: `url(${book.imageLinks && book.imageLinks.thumbnail})`}}></div>
+                                    <div className="book-shelf-changer">
+                                      <select value={book.shelf} onChange={(event)=>this.props.updateShelf(book,event)}>
+                                          <option value="move" disabled>Move to...</option>
+                                          <option value="currentlyReading">Currently Reading</option>
+                                          <option value="wantToRead">Want to Read</option>
+                                          <option value="read">Read</option>
+                                          <option value="none">None</option>
+                                      </select>
+                                    </div>
                                   </div>
-                                </div>
-                          <div className="book-title">{book.title}</div>
-                          <div className="book-authors">{book.authors}</div>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            }
+                            <div className="book-title">{book.title}</div>
+                            <div className="book-authors">{book.authors ? book.authors : 'Unkown Author'}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                }
+            </div>
+            
 
           </div>
         )
