@@ -13,7 +13,7 @@ class BooksSearch extends Component{
   updateQuery=(query) =>{
     this.setState(() => ({
       query: query
-    }), ()=> console.log("query: ", this.state.query))
+    }))
     this.search(this.state.query)
   }
 
@@ -26,7 +26,7 @@ class BooksSearch extends Component{
         } else {
           this.setState({
             searchResult: books
-          },() => console.log(this.state.searchResult))
+          })
         }
         
       })
@@ -64,9 +64,7 @@ class BooksSearch extends Component{
               </div>
             </div>
               <div className="search-books-results">
-                {this.state.query === '' ? 
-                  <div>Enter some keyword</div>  
-                  :
+                {this.state.query !== '' && 
                   <ol className="books-grid">
                     {searchResult.length !==0 && searchResult.map((book,key) => (
                       <li key={key}>
